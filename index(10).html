@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wheel Spinner with Score System</title>
+<meta name="description" content="A free classroom wheel spinner for Python. Pick students at random, give points, and let the wheel favor students who have spoken less.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #1a1a1a;
+    --panel: #222;
+    --panel-2: #2b2b2b;
+    --line: #3a3a3a;
+    --text: #ececec;
+    --muted: #a0a0a0;
+    --cyan: #00d2ff;
+    --yellow: #ffee32;
+    --red: #d32f2f;
+    --green: #2e7d32;
+    --blue: #1565c0;
+    --head: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  a { color: var(--cyan); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: var(--head); line-height: 1.15; margin: 0; }
+  h2 { font-size: 2rem; color: var(--cyan); margin-bottom: 14px; }
+  h3 { font-size: 1.2rem; margin-bottom: 6px; }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+
+  /* Hero */
+  .hero { padding: 64px 0 40px; border-top: 0; }
+  .kaomoji { font-family: var(--head); color: var(--cyan); font-size: 1.4rem; margin-bottom: 10px; }
+  h1 { font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 700; }
+  h1 span { color: var(--yellow); }
+  .lede { font-size: 1.2rem; color: #d0d0d0; margin-top: 18px; max-width: 58ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .btn {
+    display: inline-block; padding: 12px 22px; border-radius: 6px;
+    font-family: var(--head); font-weight: 600; font-size: 1.05rem;
+    text-decoration: none; color: #fff; background: var(--red);
+  }
+  .btn.alt { background: var(--panel-2); border: 1px solid var(--line); }
+  .btn:hover { filter: brightness(1.12); }
+  .shot { margin-top: 40px; }
+  .shot img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; }
+  figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 8px; }
+  figure { margin: 0; }
+
+  /* Karma */
+  .karma { display: grid; grid-template-columns: 1.1fr 1fr; gap: 36px; align-items: start; }
+  table { border-collapse: collapse; width: 100%; background: var(--panel); border-radius: 8px; overflow: hidden; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+  th { background: var(--panel-2); font-family: var(--head); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .formula { font-family: var(--head); font-size: 1.3rem; color: var(--yellow); margin: 6px 0 14px; }
+  .bar { display: inline-block; height: 10px; background: var(--cyan); border-radius: 5px; vertical-align: middle; }
+
+  /* Features */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; margin-top: 24px; }
+  .item { background: var(--panel); border-left: 4px solid var(--cyan); padding: 16px 18px; border-radius: 0 8px 8px 0; }
+  .item:nth-child(3n+2) { border-left-color: var(--yellow); }
+  .item:nth-child(3n) { border-left-color: var(--red); }
+  .item p { margin: 0; color: #cfcfcf; font-size: 0.97rem; }
+
+  /* Badges */
+  .badges { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .badges li { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 16px; }
+
+  /* Code */
+  pre {
+    background: #101010; border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; overflow-x: auto; font-size: 0.95rem; color: #9cf59c; line-height: 1.5;
+  }
+  code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+  p code, li code, td code { background: var(--panel-2); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: var(--yellow); }
+  ol.steps { padding-left: 22px; max-width: 68ch; }
+  ol.steps li { margin-bottom: 8px; }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+  .tree { color: #cfcfcf; }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0 56px; color: var(--muted); font-size: 0.95rem; }
+
+  @media (max-width: 780px) {
+    .karma, .twocol { grid-template-columns: 1fr; }
+    section { padding: 40px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kaomoji">\(^ω^\ ) &nbsp;( /^ω^)/</div>
+    <h1>Wheel Spinner <span>with Score System</span></h1>
+    <p class="lede">A desktop app for teachers. Spin a wheel to pick a student, award points, and let the wheel quietly give quieter students a bigger slice next time. Built with Python and Tkinter, with no extra installs.</p>
+    <div class="actions">
+      <a class="btn" href="https://cloudbv.itch.io/wheel-name-spin-with-score-system">Download on itch.io</a>
+      <a class="btn alt" href="#install">How to run it</a>
+    </div>
+    <figure class="shot">
+      <img src="main-screen.png" alt="The main screen: a rainbow wheel with 50 students, the scoreboard on the right, and the editor and log on the left.">
+      <figcaption>A class of 50 students on a fresh wheel. Everyone starts with equal slices.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>What it does</h2>
+    <p>Wheel Spinner picks a student at random and keeps score for each class you teach. You can use it to call on students, run quiz games, or reward participation. Every class is saved as its own file, so you can switch between classes in one click and your scores are still there next time.</p>
+    <p>It was made for classroom use. It has a full-screen mode for projectors, a large result name that is easy to read from the back of the room, and a dark layout that works well on a screen or projector.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap karma">
+    <div>
+      <h2>A fairer wheel</h2>
+      <p>Slice size depends on score. A student with fewer points gets a bigger slice, so they are more likely to be picked. A student with many points gets a thin slice. Over a lesson, this spreads turns more evenly across the room.</p>
+      <div class="formula">slice weight = 1 ÷ (score + 1)</div>
+      <p>Students you mark as absent are removed from the wheel, and their scores are kept.</p>
+    </div>
+    <table>
+      <thead><tr><th>Score</th><th>Weight</th><th>Relative slice</th></tr></thead>
+      <tbody>
+        <tr><td>0 pts</td><td>1.00</td><td><span class="bar" style="width:100%"></span></td></tr>
+        <tr><td>3 pts</td><td>0.25</td><td><span class="bar" style="width:25%"></span></td></tr>
+        <tr><td>9 pts</td><td>0.10</td><td><span class="bar" style="width:10%"></span></td></tr>
+        <tr><td>19 pts</td><td>0.05</td><td><span class="bar" style="width:5%"></span></td></tr>
+        <tr><td>99 pts</td><td>0.01</td><td><span class="bar" style="width:1%"></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="wrap">
+    <figure class="shot">
+      <img src="after-spins.png" alt="The wheel after several spins: students with more points have thin slices, students with zero points have wide slices.">
+      <figcaption>After a few rounds. Students who have earned points now have thin slices, while students with no points keep wide ones.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="item"><h3>Separate classes</h3><p>Create, rename and delete class profiles from the home screen. Each one is a single <code>.json</code> file.</p></div>
+      <div class="item"><h3>Spin and skip</h3><p>Each spin has a random speed and length. The face in the middle of the wheel changes as it slows down. The winning slice flashes white. Skip a result if you do not want it.</p></div>
+      <div class="item"><h3>Quick points</h3><p>Buttons for +1, +3, +5 and −1 give points to the student the wheel picked.</p></div>
+      <div class="item"><h3>Custom amounts</h3><p>Type any whole number in Quick Score to reward or deduct from the picked student.</p></div>
+      <div class="item"><h3>Manual score by name</h3><p>Type a student's name and a number to change anyone's score without spinning. Names are not case-sensitive. A name that does not exist is rejected, so typos never create new students.</p></div>
+      <div class="item"><h3>Attendance</h3><p>Untick a student in the scoreboard to take them off the wheel for the day.</p></div>
+      <div class="item"><h3>Scoreboard</h3><p>Search by name, sort by name or by score, and see milestone badges next to each student.</p></div>
+      <div class="item"><h3>Winner history and log</h3><p>The last five winners are shown above the scoreboard. A timestamped log records spins, winners, skips and score changes.</p></div>
+      <div class="item"><h3>Edit names in bulk</h3><p>Paste or type one name per line and press Update Names &amp; Save. Existing scores are kept, new names start at 0, removed names are deleted.</p></div>
+      <div class="item"><h3>Export, shuffle, reset</h3><p>Export scores to CSV, shuffle the list order, or reset every score to 0 after a confirmation.</p></div>
+      <div class="item"><h3>Automatic backups</h3><p>Every save also writes a timestamped copy to a <code>backups</code> folder. The newest 5 per class are kept.</p></div>
+      <div class="item"><h3>Full screen</h3><p>Press <kbd>F11</kbd> to go full screen for a projector or smartboard.</p></div>
+    </div>
+
+    <h3 style="margin-top:34px">Score badges</h3>
+    <ul class="badges">
+      <li>🥉 10 points</li>
+      <li>🥈 20 points</li>
+      <li>🥇 30 points</li>
+      <li>💎 50 points</li>
+    </ul>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Run it</h2>
+    <p>You need Python 3 with Tkinter. Tkinter comes with Python on Windows and macOS. On some Linux systems you install it separately. The app uses only the Python standard library, so there is nothing else to install.</p>
+    <ol class="steps">
+      <li>Download the script and put it in its own folder.</li>
+      <li>Open a terminal in that folder.</li>
+      <li>Run the command below.</li>
+      <li>Choose <strong>Create New Class Profile</strong>, then type your students' names, one per line.</li>
+    </ol>
+    <pre><code>python3 wheel_spinner.py</code></pre>
+    <p>On Debian or Ubuntu, if you see an error about <code>tkinter</code>:</p>
+    <pre><code>sudo apt install python3-tk</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap twocol">
+    <div>
+      <h2>Where your data lives</h2>
+      <p>The app saves next to the script, no matter how you launch it. Each class is a <code>.json</code> file. Back-ups go in <code>backups/</code>.</p>
+      <pre class="tree"><code>wheel_spinner/
+├── wheel_spinner.py
+├── Class_A.json
+├── Class_B.json
+└── backups/
+    ├── Class_A_20260101_083000.json
+    └── ...</code></pre>
+      <p>Save files hold each student's score and attendance:</p>
+      <pre><code>{
+  "students":   { "Budi": 4, "Sari": 0 },
+  "attendance": { "Budi": true, "Sari": true }
+}</code></pre>
+    </div>
+    <div>
+      <h2>Customize it</h2>
+      <p>The settings are at the top of the script:</p>
+      <ul>
+        <li><code>SCHOOL_NAME</code> changes the title on the home screen.</li>
+        <li><code>MAX_BACKUPS</code> sets how many backups to keep per class.</li>
+      </ul>
+      <p>Other values are marked with comments in the code, such as the spin speed and duration, wheel colors, and badge thresholds.</p>
+      <h3 style="margin-top:22px">Good to know</h3>
+      <ul>
+        <li>Scores cannot go below 0.</li>
+        <li>Only whole numbers are accepted for custom points.</li>
+        <li>Wheel names are cut to 10 characters, and scoreboard names to 12.</li>
+        <li>Very large classes have narrow slices. The 50-student wheel above is still easy to read.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Made by Yosef Setiawan. Also available on <a href="https://cloudbv.itch.io/wheel-name-spin-with-score-system">itch.io</a>.
+  </div>
+</footer>
+
+</body>
+</html>
