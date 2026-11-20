@@ -1,4 +1,4 @@
-# \(^ω^\ ) Wheel Spinner with Score System ( /^ω^)/
+# .\(^ω^\ ) Wheel Spinner with Score System ( /^ω^)/
 
 A desktop app for teachers. Spin a wheel to pick a student, award points, and let the wheel give students with fewer points a bigger slice next time. Built with Python and Tkinter, with no extra installs.
 
